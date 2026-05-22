@@ -3,118 +3,108 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
+
+import 'cloudinary_service.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final CloudinaryService _cloudinary = CloudinaryService();
 
-  /// ----------------------------------------------------
-  /// ⭐ CHECK IF CURRENT USER LIKED A POST
-  /// ----------------------------------------------------
+  static String? lastError;
+
   bool isLikedByMe(Map<String, dynamic> data) {
     final user = _auth.currentUser;
     if (user == null) return false;
 
-    if (data["likedBy"] == null) return false;
-
-    return (data["likedBy"] as List).contains(user.uid);
+    return (data["likedBy"] as List? ?? []).contains(user.uid);
   }
 
-  /// ----------------------------------------------------
-  /// ⭐ Extract Hashtags (#road #issue #crime)
-  /// ----------------------------------------------------
   List<String> extractHashtags(String text) {
     final regex = RegExp(r'\B#\w+');
     return regex.allMatches(text).map((m) => m.group(0)!).toList();
   }
 
-  /// ----------------------------------------------------
-  /// ⭐ Create Post (Mobile + Web Image Support)
-  /// ----------------------------------------------------
   Future<bool> createPost({
     required String text,
     required String location,
     File? imageFile,
-    Uint8List? webImage, // Web image support
+    Uint8List? webImage,
   }) async {
+    lastError = null;
+
     try {
       final user = _auth.currentUser;
-
-      if (user == null) return false;
-
-      String? imageUrl;
-
-      // ⭐ IMAGE UPLOAD
-      if (imageFile != null || webImage != null) {
-        final fileName = "${DateTime.now().millisecondsSinceEpoch}.jpg";
-
-        final ref = FirebaseStorage.instance
-            .ref()
-            .child("post_images")
-            .child(fileName);
-
-        if (kIsWeb && webImage != null) {
-          // ⭐ WEB IMAGE UPLOAD
-          await ref.putData(
-            webImage,
-            SettableMetadata(contentType: "image/jpeg"),
-          );
-        } else if (imageFile != null) {
-          // ⭐ MOBILE IMAGE UPLOAD
-          await ref.putFile(imageFile);
-        }
-
-        imageUrl = await ref.getDownloadURL();
+      if (user == null) {
+        lastError = "You must be logged in to post";
+        return false;
       }
 
-      // ⭐ Extract hashtags
-      final hashtags = extractHashtags(text);
-
-      // ⭐ Create Post document
       final postDoc = _db.collection("posts").doc();
+      var imageUrl = "";
+      var imagePath = "";
+
+      if (imageFile != null || webImage != null) {
+        final imageBytes = webImage ?? await imageFile!.readAsBytes();
+        final upload = await _cloudinary.uploadPostImage(
+          userId: user.uid,
+          postId: postDoc.id,
+          imageFile: kIsWeb ? null : imageFile,
+          imageBytes: imageBytes,
+        );
+
+        imageUrl = upload.secureUrl;
+        imagePath = upload.publicId;
+      }
 
       await postDoc.set({
         "postId": postDoc.id,
         "userId": user.uid,
-        "userName": user.email!.split('@')[0],
+        "userName": user.email?.split('@')[0] ?? "User",
         "text": text,
-        "hashtags": hashtags,
+        "hashtags": extractHashtags(text),
         "location": location,
         "imageUrl": imageUrl,
+        "imagePath": imagePath,
+        "imageProvider": imageUrl.isEmpty ? "" : "cloudinary",
+        "hasImage": imageUrl.isNotEmpty,
         "likes": 0,
         "likedBy": [],
+        "status": "Pending",
+        "editedOnce": false,
         "createdAt": FieldValue.serverTimestamp(),
       });
 
       return true;
+    } on FirebaseException catch (e) {
+      lastError = _friendlyFirebaseError(e);
+      debugPrint("Post Firebase error: ${e.code} - ${e.message}");
+      return false;
     } catch (e) {
-      print("Post error: $e");
+      lastError = e.toString();
+      debugPrint("Post error: $e");
       return false;
     }
   }
 
-  /// ----------------------------------------------------
-  /// ⭐ Like / Unlike Post
-  /// ----------------------------------------------------
   Future<void> toggleLike(String postId) async {
     final user = _auth.currentUser;
     if (user == null) return;
 
     final postRef = _db.collection("posts").doc(postId);
     final post = await postRef.get();
+    final data = post.data();
+    if (data == null) return;
 
-    List likedBy = post["likedBy"];
+    final likedBy = data["likedBy"] as List? ?? [];
 
     if (likedBy.contains(user.uid)) {
-      // ⭐ Unlike
       await postRef.update({
         "likedBy": FieldValue.arrayRemove([user.uid]),
         "likes": FieldValue.increment(-1),
       });
     } else {
-      // ⭐ Like
       await postRef.update({
         "likedBy": FieldValue.arrayUnion([user.uid]),
         "likes": FieldValue.increment(1),
@@ -122,13 +112,196 @@ class FirestoreService {
     }
   }
 
-  /// ----------------------------------------------------
-  /// ⭐ Real-time Posts Stream
-  /// ----------------------------------------------------
+  Future<void> updatePostStatus(String postId, String status) async {
+    await _db.collection("posts").doc(postId).update({"status": status});
+  }
+
+  Future<bool> editPostOnce(String postId, String updatedText) async {
+    lastError = null;
+
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        lastError = "You must be logged in to edit a post";
+        return false;
+      }
+
+      final postRef = _db.collection("posts").doc(postId);
+
+      await _db.runTransaction((transaction) async {
+        final post = await transaction.get(postRef);
+        final data = post.data();
+
+        if (data == null) {
+          throw FirebaseException(
+            plugin: "cloud_firestore",
+            code: "not-found",
+            message: "Post not found",
+          );
+        }
+
+        if (data["userId"] != user.uid) {
+          throw FirebaseException(
+            plugin: "cloud_firestore",
+            code: "permission-denied",
+            message: "You can edit only your own posts",
+          );
+        }
+
+        if (data["editedOnce"] == true) {
+          throw FirebaseException(
+            plugin: "cloud_firestore",
+            code: "failed-precondition",
+            message: "This post has already been edited once",
+          );
+        }
+
+        transaction.update(postRef, {
+          "text": updatedText,
+          "hashtags": extractHashtags(updatedText),
+          "editedOnce": true,
+          "editedAt": FieldValue.serverTimestamp(),
+        });
+      });
+
+      return true;
+    } on FirebaseException catch (e) {
+      lastError = e.message ?? e.code;
+      debugPrint("Edit post Firebase error: ${e.code} - ${e.message}");
+      return false;
+    } catch (e) {
+      lastError = e.toString();
+      debugPrint("Edit post error: $e");
+      return false;
+    }
+  }
+
+  Future<bool> deletePost(String postId, {String? imagePath}) async {
+    lastError = null;
+
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        lastError = "You must be logged in to delete a post";
+        return false;
+      }
+
+      final postRef = _db.collection("posts").doc(postId);
+      final post = await postRef.get();
+      final data = post.data();
+
+      if (data == null) {
+        lastError = "Post not found";
+        return false;
+      }
+
+      if (data["userId"] != user.uid) {
+        lastError = "You can delete only your own posts";
+        return false;
+      }
+
+      final comments = await postRef.collection("comments").get();
+      final batch = _db.batch();
+      for (final comment in comments.docs) {
+        batch.delete(comment.reference);
+      }
+      batch.delete(postRef);
+      await batch.commit();
+
+      return true;
+    } on FirebaseException catch (e) {
+      lastError = e.message ?? e.code;
+      debugPrint("Delete post Firebase error: ${e.code} - ${e.message}");
+      return false;
+    } catch (e) {
+      lastError = e.toString();
+      debugPrint("Delete post error: $e");
+      return false;
+    }
+  }
+
+  Future<bool> addComment(String postId, String text) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return false;
+
+      final postRef = _db.collection("posts").doc(postId);
+      final commentRef = postRef.collection("comments").doc();
+      final batch = _db.batch();
+
+      batch.set(commentRef, {
+        "commentId": commentRef.id,
+        "userId": user.uid,
+        "userName": user.email?.split('@')[0] ?? "User",
+        "text": text,
+        "likes": 0,
+        "likedBy": [],
+        "createdAt": FieldValue.serverTimestamp(),
+      });
+
+      batch.update(postRef, {"commentsCount": FieldValue.increment(1)});
+      await batch.commit();
+
+      return true;
+    } on FirebaseException catch (e) {
+      debugPrint("Comment Firebase error: ${e.code} - ${e.message}");
+      return false;
+    } catch (e) {
+      debugPrint("Comment error: $e");
+      return false;
+    }
+  }
+
+  Stream<QuerySnapshot> getComments(String postId) {
+    return _db
+        .collection("posts")
+        .doc(postId)
+        .collection("comments")
+        .orderBy("createdAt", descending: false)
+        .snapshots();
+  }
+
+  Future<void> toggleCommentLike(String postId, String commentId) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final commentRef = _db
+        .collection("posts")
+        .doc(postId)
+        .collection("comments")
+        .doc(commentId);
+    final comment = await commentRef.get();
+    final data = comment.data();
+    if (data == null) return;
+
+    final likedBy = List<String>.from(data["likedBy"] ?? []);
+
+    if (likedBy.contains(user.uid)) {
+      await commentRef.update({
+        "likedBy": FieldValue.arrayRemove([user.uid]),
+        "likes": FieldValue.increment(-1),
+      });
+    } else {
+      await commentRef.update({
+        "likedBy": FieldValue.arrayUnion([user.uid]),
+        "likes": FieldValue.increment(1),
+      });
+    }
+  }
+
+  bool isCommentLikedByMe(Map<String, dynamic> data) {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+
+    return (data["likedBy"] as List? ?? []).contains(user.uid);
+  }
+
   Stream<QuerySnapshot> getPosts() {
     return _db
         .collection("posts")
         .orderBy("createdAt", descending: true)
         .snapshots();
   }
+
+  String _friendlyFirebaseError(FirebaseException e) => e.message ?? e.code;
 }

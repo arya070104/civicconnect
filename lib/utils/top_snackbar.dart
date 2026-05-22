@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 class TopSnackBar {
   static OverlayEntry? _currentEntry; // prevents stacking multiple snackbars
+  static bool _isCurrentEntryMounted = false;
 
   static void show(
     BuildContext context,
@@ -14,17 +15,15 @@ class TopSnackBar {
     IconData? icon,
   }) {
     // Remove any old active snackbar
-    _currentEntry?.remove();
+    _removeCurrentEntry();
     _currentEntry = null;
 
-    final brightness = Theme.of(context).brightness;
-
-    // Auto color based on theme with translucent blur
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accentColor = color ?? Colors.brown;
     final bgColor =
-        color ??
-        (brightness == Brightness.dark
-            ? Colors.white.withOpacity(0.10)
-            : Colors.black.withOpacity(0.45));
+        isDark
+            ? const Color(0xFF151515).withValues(alpha: 0.94)
+            : const Color(0xFFFFFCF5).withValues(alpha: 0.92);
 
     // Vibration feedback
     if (vibrate) HapticFeedback.mediumImpact();
@@ -35,30 +34,43 @@ class TopSnackBar {
           (context) => _TopSnackBarWidget(
             message: message,
             color: bgColor,
-            textColor: Colors.white,
+            accentColor: accentColor,
+            textColor: isDark ? Colors.white : const Color(0xFF4B1E18),
             icon: icon,
           ),
     );
 
     _currentEntry = overlayEntry;
+    _isCurrentEntryMounted = true;
     overlay.insert(overlayEntry);
 
     Future.delayed(duration, () {
-      overlayEntry.remove();
-      if (_currentEntry == overlayEntry) _currentEntry = null;
+      if (_currentEntry == overlayEntry) {
+        _removeCurrentEntry();
+      }
     });
+  }
+
+  static void _removeCurrentEntry() {
+    if (_currentEntry == null || !_isCurrentEntryMounted) return;
+
+    _currentEntry!.remove();
+    _currentEntry = null;
+    _isCurrentEntryMounted = false;
   }
 }
 
 class _TopSnackBarWidget extends StatefulWidget {
   final String message;
   final Color color;
+  final Color accentColor;
   final Color textColor;
   final IconData? icon;
 
   const _TopSnackBarWidget({
     required this.message,
     required this.color,
+    required this.accentColor,
     required this.textColor,
     this.icon,
   });
@@ -116,22 +128,22 @@ class _TopSnackBarWidgetState extends State<_TopSnackBarWidget>
               filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 14,
+                  horizontal: 16,
+                  vertical: 13,
                 ),
                 decoration: BoxDecoration(
                   color: widget.color,
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(22),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.20),
-                    width: 1,
+                    color: widget.accentColor.withValues(alpha: 0.22),
+                    width: 1.2,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.25),
-                      blurRadius: 20,
+                      color: widget.accentColor.withValues(alpha: 0.18),
+                      blurRadius: 24,
                       spreadRadius: 1,
-                      offset: const Offset(0, 6),
+                      offset: const Offset(0, 10),
                     ),
                   ],
                 ),
@@ -139,15 +151,24 @@ class _TopSnackBarWidgetState extends State<_TopSnackBarWidget>
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (widget.icon != null)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: Icon(widget.icon, color: Colors.white, size: 20),
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        color: widget.accentColor.withValues(alpha: 0.14),
+                        shape: BoxShape.circle,
                       ),
+                      child: Icon(
+                        widget.icon ?? Icons.notifications_active_outlined,
+                        color: widget.accentColor,
+                        size: 19,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
                     Flexible(
                       child: Text(
                         widget.message,
-                        textAlign: TextAlign.center,
+                        textAlign: TextAlign.left,
                         style: TextStyle(
                           color: widget.textColor,
                           fontSize: 15,

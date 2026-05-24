@@ -78,7 +78,7 @@ class _PulseLoaderState extends State<PulseLoader>
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: widget.color.withOpacity(0.32),
+                        color: widget.color.withValues(alpha: 0.32),
                         blurRadius: 16,
                         spreadRadius: 1,
                       ),

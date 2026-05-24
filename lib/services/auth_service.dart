@@ -21,6 +21,8 @@ class AuthService {
       final user = userCredential.user;
 
       if (user != null) {
+        await user.updateDisplayName(name);
+
         // Save user profile to Firestore
         await _db.collection("users").doc(user.uid).set({
           "uid": user.uid,

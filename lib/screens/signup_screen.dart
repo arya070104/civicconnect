@@ -1,7 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import '../utils/theme_controller.dart';
 import '../utils/top_snackbar.dart';
+import '../widgets/glowing_background_logo.dart';
 import '../widgets/pulse_loader.dart';
 
 class SignupPage extends StatefulWidget {
@@ -13,6 +16,7 @@ class SignupPage extends StatefulWidget {
 
 class _SignupPageState extends State<SignupPage> {
   final nameController = TextEditingController();
+  final usernameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
@@ -25,6 +29,7 @@ class _SignupPageState extends State<SignupPage> {
   @override
   void dispose() {
     nameController.dispose();
+    usernameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
@@ -32,21 +37,14 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF0EDE5),
+      backgroundColor: isDark ? Colors.black : const Color(0xFFF0EDE5),
       body: Stack(
         children: [
           Positioned.fill(
-            child: Opacity(
-              opacity: 0.12,
-              child: Center(
-                child: Image.asset(
-                  "assets/Icon-512.png",
-                  width: MediaQuery.of(context).size.width * 0.40,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
+            child: Center(child: GlowingBackgroundLogo(isDark: isDark)),
           ),
           Center(
             child: TweenAnimationBuilder<double>(
@@ -66,111 +64,152 @@ class _SignupPageState extends State<SignupPage> {
                 );
               },
               child: SingleChildScrollView(
-                child: Container(
-                  padding: const EdgeInsets.all(25),
-                  margin: const EdgeInsets.symmetric(horizontal: 25),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.16),
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.36),
-                      width: 1.4,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.14),
-                        blurRadius: 25,
-                        spreadRadius: 2,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Image.asset("assets/Icon-512.png", height: 70, width: 70),
-                      const SizedBox(height: 10),
-                      const Text(
-                        "Create Account",
-                        style: TextStyle(
-                          fontSize: 34,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF4B1E18),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 430),
+                    child: Container(
+                      padding: const EdgeInsets.all(25),
+                      decoration: BoxDecoration(
+                        color:
+                            isDark
+                                ? const Color(
+                                  0xFF101010,
+                                ).withValues(alpha: 0.74)
+                                : Colors.white.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(
+                          color: Colors.white.withValues(
+                            alpha: isDark ? 0.12 : 0.36,
+                          ),
+                          width: 1.4,
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.14),
+                            blurRadius: 25,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 35),
-                      _label("Full Name"),
-                      _glassInput(
-                        controller: nameController,
-                        hint: "Enter your full name",
-                        icon: Icons.person_outline,
-                      ),
-                      const SizedBox(height: 20),
-                      _label("Email"),
-                      _glassInput(
-                        controller: emailController,
-                        hint: "Enter your email",
-                        icon: Icons.email_outlined,
-                      ),
-                      const SizedBox(height: 20),
-                      _label("Password"),
-                      _glassInput(
-                        controller: passwordController,
-                        hint: "Enter password",
-                        icon: Icons.lock_outline,
-                        isPassword: true,
-                      ),
-                      const SizedBox(height: 30),
-                      _signupButton(),
-                      const SizedBox(height: 20),
-                      MouseRegion(
-                        onEnter: (_) => setState(() => hoverLogin = true),
-                        onExit: (_) => setState(() => hoverLogin = false),
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () => Navigator.pop(context),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                  color:
-                                      hoverLogin
-                                          ? Colors.brown
-                                          : Colors.transparent,
-                                  width: 1.6,
+                      child: Column(
+                        children: [
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: _themeButton(isDark),
+                          ),
+                          const SizedBox(height: 10),
+                          _logoBadge(isDark),
+                          const SizedBox(height: 10),
+                          Text(
+                            "Create Account",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 34,
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  isDark
+                                      ? Colors.white
+                                      : const Color(0xFF4B1E18),
+                            ),
+                          ),
+                          const SizedBox(height: 35),
+                          _label("Full Name", isDark),
+                          _glassInput(
+                            controller: nameController,
+                            hint: "Enter your full name",
+                            icon: Icons.person_outline,
+                            isDark: isDark,
+                          ),
+                          const SizedBox(height: 20),
+                          _label("Username", isDark),
+                          _glassInput(
+                            controller: usernameController,
+                            hint: "Choose a username",
+                            icon: Icons.alternate_email_rounded,
+                            isDark: isDark,
+                          ),
+                          const SizedBox(height: 20),
+                          _label("Email", isDark),
+                          _glassInput(
+                            controller: emailController,
+                            hint: "Enter your email",
+                            icon: Icons.email_outlined,
+                            isDark: isDark,
+                          ),
+                          const SizedBox(height: 20),
+                          _label("Password", isDark),
+                          _glassInput(
+                            controller: passwordController,
+                            hint: "Enter password",
+                            icon: Icons.lock_outline,
+                            isPassword: true,
+                            isDark: isDark,
+                          ),
+                          const SizedBox(height: 30),
+                          _signupButton(),
+                          const SizedBox(height: 20),
+                          MouseRegion(
+                            onEnter: (_) => setState(() => hoverLogin = true),
+                            onExit: (_) => setState(() => hoverLogin = false),
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => Navigator.pop(context),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 180),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color:
+                                          hoverLogin
+                                              ? Colors.brown
+                                              : Colors.transparent,
+                                      width: 1.6,
+                                    ),
+                                  ),
+                                ),
+                                child: AnimatedDefaultTextStyle(
+                                  duration: const Duration(milliseconds: 200),
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color:
+                                        hoverLogin
+                                            ? isDark
+                                                ? Colors.white
+                                                : Colors.brown.shade900
+                                            : isDark
+                                            ? Colors.white70
+                                            : Colors.brown.shade700,
+                                    fontWeight: FontWeight.w600,
+                                    shadows:
+                                        hoverLogin
+                                            ? [
+                                              Shadow(
+                                                color: Colors.brown.withValues(
+                                                  alpha: 0.7,
+                                                ),
+                                                blurRadius: 12,
+                                              ),
+                                            ]
+                                            : [],
+                                  ),
+                                  child: const Text(
+                                    "Already have an account? Login",
+                                  ),
                                 ),
                               ),
                             ),
-                            child: AnimatedDefaultTextStyle(
-                              duration: const Duration(milliseconds: 200),
-                              style: TextStyle(
-                                fontSize: 15,
-                                color:
-                                    hoverLogin
-                                        ? Colors.brown.shade900
-                                        : Colors.brown.shade700,
-                                fontWeight: FontWeight.w600,
-                                shadows:
-                                    hoverLogin
-                                        ? [
-                                          Shadow(
-                                            color: Colors.brown.withValues(
-                                              alpha: 0.7,
-                                            ),
-                                            blurRadius: 12,
-                                          ),
-                                        ]
-                                        : [],
-                              ),
-                              child: const Text(
-                                "Already have an account? Login",
-                              ),
-                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -215,9 +254,9 @@ class _SignupPageState extends State<SignupPage> {
                     Colors.brown.withValues(
                       alpha: hoverSignupButton ? 0.88 : 0.76,
                     ),
-                    const Color(0xFF6F4A3E).withValues(
-                      alpha: hoverSignupButton ? 0.86 : 0.72,
-                    ),
+                    const Color(
+                      0xFF6F4A3E,
+                    ).withValues(alpha: hoverSignupButton ? 0.86 : 0.72),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(16),
@@ -249,10 +288,11 @@ class _SignupPageState extends State<SignupPage> {
 
   Future<void> _signupUser() async {
     final name = nameController.text.trim();
+    final username = usernameController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
-    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+    if (name.isEmpty || username.isEmpty || email.isEmpty || password.isEmpty) {
       TopSnackBar.show(
         context,
         "Please fill all fields",
@@ -262,13 +302,64 @@ class _SignupPageState extends State<SignupPage> {
       return;
     }
 
+    if (name.split(RegExp(r'\s+')).length < 2) {
+      TopSnackBar.show(
+        context,
+        "Please enter your full name",
+        color: Colors.redAccent,
+        icon: Icons.warning_amber_rounded,
+      );
+      return;
+    }
+
+    if (!RegExp(r'^[a-zA-Z0-9_]{3,20}$').hasMatch(username)) {
+      TopSnackBar.show(
+        context,
+        "Username must be 3-20 letters, numbers, or underscores",
+        color: Colors.redAccent,
+        icon: Icons.warning_amber_rounded,
+      );
+      return;
+    }
+
     setState(() => isLoading = true);
 
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      final existingUsername =
+          await FirebaseFirestore.instance
+              .collection("users")
+              .where("userName", isEqualTo: username)
+              .limit(1)
+              .get();
+      if (existingUsername.docs.isNotEmpty) {
+        if (!mounted) return;
+        TopSnackBar.show(
+          context,
+          "Username is already taken",
+          color: Colors.redAccent,
+          icon: Icons.error,
+        );
+        setState(() => isLoading = false);
+        return;
+      }
+
+      final credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      final user = credential.user;
+
+      if (user != null) {
+        await user.updateDisplayName(username);
+        await FirebaseFirestore.instance.collection("users").doc(user.uid).set({
+          "uid": user.uid,
+          "name": name,
+          "fullName": name,
+          "userName": username,
+          "displayName": username,
+          "email": email,
+          "photoUrl": "",
+          "createdAt": FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
 
       if (!mounted) return;
       TopSnackBar.show(
@@ -301,17 +392,109 @@ class _SignupPageState extends State<SignupPage> {
     if (mounted) setState(() => isLoading = false);
   }
 
-  Widget _label(String title) {
+  Widget _label(String title, bool isDark) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Text(
         title,
-        style: const TextStyle(
-          color: Color(0xFF4B1E18),
+        style: TextStyle(
+          color: isDark ? Colors.white : const Color(0xFF4B1E18),
           fontWeight: FontWeight.w600,
           fontSize: 16,
         ),
       ),
+    );
+  }
+
+  Widget _themeButton(bool isDark) {
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: appThemeMode,
+      builder: (context, mode, child) {
+        return GestureDetector(
+          onTap: () {
+            appThemeMode.value = isDark ? ThemeMode.light : ThemeMode.dark;
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            width: 92,
+            height: 36,
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(99),
+              color:
+                  isDark
+                      ? Colors.white.withValues(alpha: 0.10)
+                      : const Color(0xFFFFFBF2).withValues(alpha: 0.78),
+              border: Border.all(
+                color:
+                    isDark
+                        ? Colors.white.withValues(alpha: 0.18)
+                        : const Color(0xFF5A332B).withValues(alpha: 0.34),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.36 : 0.12),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  isDark
+                      ? Icons.dark_mode_rounded
+                      : Icons.light_mode_rounded,
+                  size: 16,
+                  color: isDark ? const Color(0xFFD7B6A4) : Colors.brown,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  isDark ? "Dark" : "Light",
+                  style: TextStyle(
+                    color:
+                        isDark
+                            ? const Color(0xFFF2E7DE)
+                            : const Color(0xFF4B1E18),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _logoBadge(bool isDark) {
+    return Container(
+      width: 82,
+      height: 82,
+      padding: const EdgeInsets.all(9),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color:
+            isDark
+                ? Colors.white.withValues(alpha: 0.07)
+                : const Color(0xFFFFFBF2).withValues(alpha: 0.92),
+        border: Border.all(
+          color:
+              isDark
+                  ? Colors.white.withValues(alpha: 0.16)
+                  : const Color(0xFF5A332B).withValues(alpha: 0.18),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.10),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Image.asset("assets/Icon-512.png", fit: BoxFit.contain),
     );
   }
 
@@ -320,6 +503,7 @@ class _SignupPageState extends State<SignupPage> {
     required String hint,
     required IconData icon,
     bool isPassword = false,
+    required bool isDark,
   }) {
     final focused = focusedField == hint;
 
@@ -331,21 +515,33 @@ class _SignupPageState extends State<SignupPage> {
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOutCubic,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: focused ? 0.55 : 0.30),
+          color:
+              isDark
+                  ? Colors.white.withValues(alpha: focused ? 0.12 : 0.07)
+                  : const Color(0xFFFFFBF2).withValues(
+                    alpha: focused ? 0.82 : 0.66,
+                  ),
           borderRadius: BorderRadius.circular(focused ? 18 : 14),
           border: Border.all(
             color:
                 focused
-                    ? Colors.brown.withValues(alpha: 0.48)
-                    : Colors.white.withValues(alpha: 0.48),
+                    ? (isDark
+                        ? const Color(0xFFD7B6A4).withValues(alpha: 0.62)
+                        : const Color(0xFF5A332B).withValues(alpha: 0.78))
+                    : isDark
+                    ? Colors.white.withValues(alpha: 0.22)
+                    : const Color(0xFF5A332B).withValues(alpha: 0.46),
+            width: focused ? 1.7 : 1.25,
           ),
           boxShadow:
-              focused
+              focused || !isDark
                   ? [
                     BoxShadow(
-                      color: Colors.brown.withValues(alpha: 0.16),
-                      blurRadius: 22,
-                      offset: const Offset(0, 8),
+                      color: Colors.brown.withValues(
+                        alpha: focused ? 0.16 : 0.08,
+                      ),
+                      blurRadius: focused ? 22 : 14,
+                      offset: Offset(0, focused ? 8 : 5),
                     ),
                   ]
                   : [],
@@ -354,13 +550,22 @@ class _SignupPageState extends State<SignupPage> {
           controller: controller,
           obscureText: isPassword ? !isPasswordVisible : false,
           cursorColor: Colors.brown,
+          style: TextStyle(
+            color: isDark ? Colors.white : const Color(0xFF2F211D),
+            fontWeight: FontWeight.w600,
+          ),
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 18,
               vertical: 18,
             ),
             hintText: hint,
-            hintStyle: const TextStyle(color: Colors.black54),
+            hintStyle: TextStyle(
+              color:
+                  isDark
+                      ? Colors.white54
+                      : const Color(0xFF6B5650).withValues(alpha: 0.72),
+            ),
             prefixIcon: Icon(icon, color: Colors.brown),
             suffixIcon:
                 isPassword
@@ -378,6 +583,8 @@ class _SignupPageState extends State<SignupPage> {
                     )
                     : null,
             border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
           ),
         ),
       ),

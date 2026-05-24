@@ -30,17 +30,44 @@ class CivicConnectApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'CivicConnect',
           themeMode: themeMode,
+          themeAnimationDuration: const Duration(milliseconds: 420),
+          themeAnimationCurve: Curves.easeOutCubic,
           theme: ThemeData(
             brightness: Brightness.light,
             primarySwatch: Colors.blue,
             scaffoldBackgroundColor: const Color(0xFFF5EDE0),
             primaryColor: Colors.black,
-            inputDecorationTheme: const InputDecorationTheme(
+            inputDecorationTheme: InputDecorationTheme(
               filled: true,
-              fillColor: Colors.white,
+              fillColor: const Color(0xFFFFFCF5).withValues(alpha: 0.64),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(12)),
-                borderSide: BorderSide.none,
+                borderRadius: const BorderRadius.all(Radius.circular(16)),
+                borderSide: BorderSide(
+                  color: Colors.brown.withValues(alpha: 0.18),
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: const BorderRadius.all(Radius.circular(16)),
+                borderSide: BorderSide(
+                  color: Colors.brown.withValues(alpha: 0.18),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: const BorderRadius.all(Radius.circular(18)),
+                borderSide: BorderSide(
+                  color: Colors.brown.withValues(alpha: 0.52),
+                  width: 1.4,
+                ),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: const BorderRadius.all(Radius.circular(16)),
+                borderSide: BorderSide(
+                  color: Colors.redAccent.withValues(alpha: 0.70),
+                ),
               ),
             ),
           ),
@@ -51,13 +78,47 @@ class CivicConnectApp extends StatelessWidget {
             inputDecorationTheme: InputDecorationTheme(
               filled: true,
               fillColor: Colors.white.withValues(alpha: 0.06),
-              border: const OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(12)),
-                borderSide: BorderSide.none,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: const BorderRadius.all(Radius.circular(16)),
+                borderSide: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.18),
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: const BorderRadius.all(Radius.circular(16)),
+                borderSide: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.18),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: const BorderRadius.all(Radius.circular(18)),
+                borderSide: BorderSide(
+                  color: const Color(0xFFD7B6A4).withValues(alpha: 0.62),
+                  width: 1.4,
+                ),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: const BorderRadius.all(Radius.circular(16)),
+                borderSide: BorderSide(
+                  color: Colors.redAccent.withValues(alpha: 0.72),
+                ),
               ),
             ),
           ),
           home: const SplashScreen(),
+          onGenerateInitialRoutes:
+              (initialRoute) => [
+                PageRouteBuilder(
+                  settings: const RouteSettings(name: '/'),
+                  pageBuilder:
+                      (context, animation, secondaryAnimation) =>
+                          const SplashScreen(),
+                ),
+              ],
           onGenerateRoute: _buildRoute,
         );
       },
@@ -78,24 +139,30 @@ class CivicConnectApp extends StatelessWidget {
 
     return PageRouteBuilder(
       settings: settings,
-      transitionDuration: const Duration(milliseconds: 260),
-      reverseTransitionDuration: const Duration(milliseconds: 200),
+      transitionDuration: const Duration(milliseconds: 360),
+      reverseTransitionDuration: const Duration(milliseconds: 240),
       pageBuilder: (context, animation, secondaryAnimation) => builder(context),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final curvedAnimation = CurvedAnimation(
           parent: animation,
-          curve: Curves.easeOutQuart,
+          curve: Curves.easeOutCubic,
           reverseCurve: Curves.easeInCubic,
         );
 
         return FadeTransition(
           opacity: curvedAnimation,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0.018, 0.018),
-              end: Offset.zero,
+          child: ScaleTransition(
+            scale: Tween<double>(
+              begin: 0.985,
+              end: 1,
             ).animate(curvedAnimation),
-            child: child,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.035),
+                end: Offset.zero,
+              ).animate(curvedAnimation),
+              child: child,
+            ),
           ),
         );
       },

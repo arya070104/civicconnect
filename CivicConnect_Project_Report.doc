@@ -1,0 +1,802 @@
+﻿<!doctype html><html><head><meta charset="utf-8"><title>CivicConnect Project Report</title>
+<style>
+@page { size: A4; margin: 1in; }
+body { font-family: "Times New Roman", serif; font-size: 12pt; line-height: 1.5; color: #111; }
+h1 { font-size: 18pt; text-align: center; margin-top: 20pt; page-break-after: avoid; }
+h2 { font-size: 14pt; margin-top: 16pt; page-break-after: avoid; }
+p { text-align: justify; margin: 8pt 0; }
+.center { text-align: center; } .bold { font-weight: bold; }
+table { border-collapse: collapse; width: 100%; margin: 12pt 0; }
+th, td { border: 1px solid #222; padding: 6pt; vertical-align: top; }
+th { font-weight: bold; text-align: left; background: #eee; }
+.page-break { page-break-before: always; }
+.placeholder { border: 2px dashed #777; padding: 40pt; text-align: center; margin: 20pt 0; font-weight: bold; }
+</style></head><body>
+<p class="center">A Project Report on</p>
+<h1>CIVICCONNECT: COMMUNITY ISSUE REPORTING APPLICATION</h1>
+<p class="center">submitted in partial fulfilment of the requirement for the award of the degree of</p>
+<p class="center bold">Bachelor of Technology in Computer Science and Engineering</p>
+<p class="center">by</p>
+<p class="center bold">Anthati Greeshma &nbsp;&nbsp; 22CSU413</p>
+<p class="center bold">Sarthak Arya &nbsp;&nbsp; 22CSU414</p>
+<p class="center bold">Tanmay Kumar Das &nbsp;&nbsp; 22CSU416</p>
+<p class="center bold">Bhavay Mehta &nbsp;&nbsp; 22CSU434</p>
+<p class="center">Under the supervision of</p>
+<p class="center bold">Dr. Nishu</p>
+<p class="center">Associate Professor</p>
+<p class="center">Department of Computer Science and Engineering</p>
+<p class="center bold">The NorthCap University, Gurugram</p>
+<p class="center">May 2026</p>
+<div class="page-break"></div>
+<h1>CERTIFICATE</h1>
+<p>This is to certify that the project report entitled "CivicConnect: Community Issue Reporting Application" submitted by Anthati Greeshma (22CSU413), Sarthak Arya (22CSU414), Tanmay Kumar Das (22CSU416), and Bhavay Mehta (22CSU434) to The NorthCap University, Gurugram, is a record of bona fide implementation-based project work carried out under the supervision and guidance of Dr. Nishu, Associate Professor, Department of Computer Science and Engineering.</p>
+<p>The work presented in this report is suitable for consideration towards the partial fulfilment of the requirements for the award of the degree of Bachelor of Technology in Computer Science and Engineering. The project demonstrates a functional mobile application prototype, real-time backend integration, user authentication, civic issue reporting, AI-assisted report drafting, map-based zone awareness, and structured user interaction modules.</p>
+<p><b>Dr. Nishu</b><br>Associate Professor, Department of Computer Science and Engineering<br>Date: May 2026</p>
+<div class="page-break"></div>
+<h1>ACKNOWLEDGEMENT</h1>
+<p>We express our sincere gratitude to Dr. Nishu for her continuous guidance, constructive feedback, and encouragement throughout the development of CivicConnect. Her support helped us refine the problem statement, improve the technical structure of the application, and evaluate the project from both academic and real-world perspectives.</p>
+<p>We are thankful to the Department of Computer Science and Engineering, The NorthCap University, for providing an environment that encouraged practical learning, experimentation, and collaborative software development. We also thank our peers and users who reviewed the interface, tested the application flow, and shared useful suggestions during development.</p>
+<p>This project helped us strengthen our understanding of Flutter application development, Firebase-based backend services, cloud image handling, AI-assisted user support, real-time streams, state management, authentication, and mobile usability.</p>
+<div class="page-break"></div>
+<h1>ABSTRACT</h1>
+<p>CivicConnect is a Flutter-based community issue reporting application designed to make civic problem reporting easier, faster, and more transparent for local users. Many everyday civic problems such as road damage, garbage dumping, water leakage, power faults, safety concerns, and poorly maintained public areas remain unresolved because citizens do not have a convenient and structured way to record, categorize, discuss, and track them.</p>
+<p>The implementation uses Firebase Authentication for secure login and signup, Cloud Firestore for real-time post and comment storage, Cloudinary for multi-image uploads, OpenStreetMap through flutter_map for zone visualization, Geolocator and Open-Meteo for temperature display, and Firebase AI with Gemini for CivicMate, an assistant that helps users write clearer civic reports. Recent enhancements include multiple images per post, image-supported comments, image-supported resolution proof, fullscreen image viewing, owner-only comment deletion, launcher icon generation, and splash-screen display on every fresh app launch or browser reload.</p>
+<p>This report presents the problem background, objectives, scope, requirements, system architecture, design methodology, implementation details, testing strategy, performance evaluation, applicability, limitations, scalability, and future enhancements of CivicConnect. The project is categorized as an implementation-based project because the main contribution is a functional working prototype supported by backend integration and practical mobile workflows.</p>
+<div class="page-break"></div>
+<h1>TABLE OF CONTENTS</h1>
+<ul>
+<li>Chapter 1: Introduction</li>
+<li>Chapter 2: Literature and Existing System Review</li>
+<li>Chapter 3: Requirement Analysis</li>
+<li>Chapter 4: System Design</li>
+<li>Chapter 5: Implementation</li>
+<li>Chapter 6: Testing and Validation</li>
+<li>Chapter 7: Performance Evaluation and Benchmarking</li>
+<li>Chapter 8: Real-World Applicability and Scalability</li>
+<li>Chapter 9: Limitations and Future Scope</li>
+<li>Chapter 10: Conclusion</li>
+<li>Functional Requirements Table</li>
+<li>Test Case Matrix</li>
+<li>References</li>
+<li>Appendices</li>
+</ul>
+<div class="page-break"></div>
+<h1>CHAPTER 1: INTRODUCTION</h1>
+<h2>1.1 Background</h2>
+<p>Urban and campus communities face repeated civic issues that are often visible to citizens before they reach the concerned authority. A broken streetlight, overflowing garbage point, unsafe walkway, damaged road patch, water leakage, or electricity-related inconvenience may appear small when seen individually, but the collective effect reduces safety, hygiene, accessibility, and public satisfaction. CivicConnect is built around the idea that civic reporting should be simple enough for everyday users and structured enough for future administrative use.</p>
+<h2>1.2 Problem Statement</h2>
+<p>The main problem addressed by CivicConnect is the absence of a single mobile platform that allows users to report local civic problems with visual proof, structured metadata, real-time visibility, and basic community engagement. Existing informal complaint channels often lack standardization, searchability, user accountability, and progress tracking.</p>
+<h2>1.3 Objectives</h2>
+<p>The project objectives are to develop a working Flutter application, provide secure authentication, store civic reports in real time, support multi-image evidence, enable comments and replies with optional images, add zone-wise mapping, integrate an AI assistant, enforce owner-controlled status updates, allow resolution proof photos, and provide clear visual validation through fullscreen image preview.</p>
+<h2>1.4 Project Category</h2>
+<p>CivicConnect is an implementation-based project. The primary deliverable is a functional working prototype that demonstrates problem-solving through software engineering, mobile application design, cloud integration, and real-time data synchronization.</p>
+<p>The introductory and contextual aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The introductory and contextual aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The introductory and contextual aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The introductory and contextual aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The introductory and contextual aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The introductory and contextual aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The introductory and contextual aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The introductory and contextual aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<div class="page-break"></div>
+<h1>CHAPTER 2: LITERATURE AND EXISTING SYSTEM REVIEW</h1>
+<h2>2.1 Existing Complaint Handling Practices</h2>
+<p>Many civic complaints are still handled through phone calls, office visits, unstructured social media posts, or messaging groups. These channels may create awareness, but they rarely maintain a reliable data model containing issue category, location, proof, owner, status, and discussion history.</p>
+<h2>2.2 Mobile Reporting Applications</h2>
+<p>Mobile-first reporting is effective because users can capture images immediately and submit a report from the place where the issue is observed. CivicConnect follows this approach by combining post creation, evidence upload, status updates, and real-time community visibility.</p>
+<h2>2.3 Real-Time Cloud Backends</h2>
+<p>Cloud Firestore is used in CivicConnect to stream posts and comments directly to the interface. This makes the application feel live because feed and comment updates can appear without manual refresh.</p>
+<h2>2.4 AI Assistance in Reporting</h2>
+<p>CivicMate helps users draft clearer reports, identify urgency, and understand what details should be included. The assistant is designed as a support tool and does not claim official authority.</p>
+<p>The review and gap analysis aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The review and gap analysis aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The review and gap analysis aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The review and gap analysis aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The review and gap analysis aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The review and gap analysis aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The review and gap analysis aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The review and gap analysis aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<div class="page-break"></div>
+<h1>CHAPTER 3: REQUIREMENT ANALYSIS</h1>
+<h2>3.1 Functional Requirements</h2>
+<p>The system supports signup, login, forgot password, post creation, multiple image uploads, live feed, likes, comments with image attachments, replies, owner-only comment deletion, search, map view, fullscreen image preview, profile, project information, CivicMate chat, splash routing, launcher icon configuration, and status management with proof photos.</p>
+<h2>3.2 Non-Functional Requirements</h2>
+<p>The system should be usable on mobile screens, reliable under normal network conditions, secure for authenticated operations, maintainable through service separation, and scalable for more zones and future administrative workflows.</p>
+<h2>3.3 User Classes</h2>
+<p>The current user class is a citizen or campus community member. A future user class is an authority or maintenance team member who can review, assign, and verify issues through a dashboard.</p>
+<h2>3.4 Constraints</h2>
+<p>The prototype depends on Firebase configuration, Cloudinary upload settings, internet availability, Android location permissions, map tile availability, and Firebase AI availability.</p>
+<p>The requirement analysis aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The requirement analysis aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The requirement analysis aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The requirement analysis aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The requirement analysis aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The requirement analysis aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The requirement analysis aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The requirement analysis aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<div class="page-break"></div>
+<h1>CHAPTER 4: SYSTEM DESIGN</h1>
+<h2>4.1 Architectural Overview</h2>
+<p>CivicConnect follows a client-cloud architecture. Flutter provides the presentation layer. Firebase Authentication manages identity. Cloud Firestore stores users, posts, comments, likes, and status metadata. Cloudinary hosts images. Firebase AI provides CivicMate.</p>
+<h2>4.2 Data Flow</h2>
+<p>When a user creates a post, the app validates required inputs. If one or more images are present, each image is uploaded to Cloudinary. The returned URLs are stored with the Firestore post document as imageUrls and imagePaths while older single-image fields are kept for backward compatibility. Feed and search screens listen to Firestore streams and update in real time.</p>
+<h2>4.3 Data Model</h2>
+<p>The users collection stores identity metadata. The posts collection stores issue records, image URL arrays, status, and proof metadata. The comments subcollection stores post discussions, reply metadata, optional comment image arrays, likes, and ownership fields. This model is flexible for future moderation and analytics.</p>
+<h2>4.4 UI Design</h2>
+<p>The interface uses a dark/light theme, animated feedback, cards, bottom navigation, loaders, and snackbars. The design goal is to support repeated operational use rather than only a decorative landing page.</p>
+<p>The system design aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The system design aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The system design aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The system design aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The system design aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The system design aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The system design aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The system design aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<div class="page-break"></div>
+<h1>CHAPTER 5: IMPLEMENTATION</h1>
+<h2>5.1 Technology Stack</h2>
+<p>The application uses Flutter, Dart, Firebase Authentication, Cloud Firestore, Firebase AI, Cloudinary, flutter_map, Geolocator, OpenStreetMap, Open-Meteo, ImagePicker, Provider, URL Launcher, and supporting UI utilities.</p>
+<h2>5.2 Authentication Module</h2>
+<p>Users can create accounts, log in, and reset passwords. Signup stores full name, username, email, and profile metadata. Firebase Authentication handles secure identity sessions.</p>
+<h2>5.3 Post Module</h2>
+<p>Posts include text, hashtags, zone, category, urgency, optional multiple image URLs, owner ID, username, likes, status, edit flag, and timestamp. Post owners can edit once, delete their posts, and resolve their own issues with proof. The UI displays image galleries and supports fullscreen black-background preview when a user taps an image.</p>
+<h2>5.4 Comment and Reply Module</h2>
+<p>Users can add comments, attach multiple images to comments, and reply to existing comments. Reply metadata stores the target comment ID and username. Comments can also be liked. The application includes owner-only delete buttons so users can remove only their own comments.</p>
+<h2>5.5 Resolution Proof Module</h2>
+<p>When a post owner marks an issue as resolved, the system asks for text proof and allows proof photos. The proof is stored on the post and also added as an automatic resolution proof comment, giving visible evidence that the issue has been addressed.</p>
+<h2>5.5 Zone Map Module</h2>
+<p>The map displays zone polygons and issue counts using OpenStreetMap tiles. This helps users understand where active issues are concentrated.</p>
+<h2>5.6 CivicMate Module</h2>
+<p>CivicMate is integrated through Firebase AI and Gemini. It helps users write clearer issue descriptions and decide what details should be included.</p>
+<p>The implementation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The implementation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The implementation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The implementation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The implementation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The implementation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The implementation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The implementation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<div class="page-break"></div>
+<h1>CHAPTER 6: TESTING AND VALIDATION</h1>
+<h2>6.1 Testing Strategy</h2>
+<p>Testing included functional tests, UI interaction checks, backend integration checks, negative tests, and static analysis. The team focused on validating the main user journeys and critical permission constraints.</p>
+<h2>6.2 Functional Validation</h2>
+<p>Signup, login, post creation, multi-image upload, likes, image comments, replies, owner-only comment deletion, resolution proof photos, fullscreen image preview, search, map counts, profile view, splash routing, launcher icon generation, and CivicMate responses were checked as part of the validation process.</p>
+<h2>6.3 Constraint Validation</h2>
+<p>Owner-only status update, locked resolved posts, one-time post editing, required fields, empty comment rejection unless images are attached, owner-only comment deletion, and optional-service fallback were treated as important validation points.</p>
+<h2>6.4 Static Analysis</h2>
+<p>Flutter analysis was used to identify undefined methods, import conflicts, unused variables, and type errors. The development environment reported no issues after corrections.</p>
+<p>The testing and validation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The testing and validation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The testing and validation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The testing and validation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The testing and validation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The testing and validation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The testing and validation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The testing and validation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<div class="page-break"></div>
+<h1>CHAPTER 7: PERFORMANCE EVALUATION AND BENCHMARKING</h1>
+<h2>7.1 Evaluation Parameters</h2>
+<p>Performance was reviewed through startup behavior, route transitions, post creation, image upload, feed refresh, comment update latency, search behavior, map rendering, and AI fallback response.</p>
+<h2>7.2 Benchmarking Approach</h2>
+<p>The project uses practical prototype benchmarking rather than large-scale laboratory stress testing. The goal is to verify whether typical student-project and community-demo workflows complete reliably.</p>
+<h2>7.3 Observations</h2>
+<p>Firestore streams provide responsive feed updates for prototype-scale data. Image upload depends on network quality. Search works well for small and medium datasets and can later be upgraded with indexes or server-side search.</p>
+<h2>7.4 Risk Areas</h2>
+<p>Network dependency, API configuration, unindexed large queries, missing security rules, and AI service availability are the main risk areas for production deployment.</p>
+<p>The performance evaluation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The performance evaluation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The performance evaluation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The performance evaluation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The performance evaluation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The performance evaluation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The performance evaluation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The performance evaluation aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<div class="page-break"></div>
+<h1>CHAPTER 8: REAL-WORLD APPLICABILITY AND SCALABILITY</h1>
+<h2>8.1 Applicability</h2>
+<p>CivicConnect can be used in university campuses, gated communities, residential societies, municipal pilot areas, and smart city demonstration environments. The zone system can be adapted to blocks, wards, hostels, sectors, or departments.</p>
+<h2>8.2 Benefits</h2>
+<p>The system improves visibility of local problems, records evidence, creates discussion history, supports community participation, and gives future administrators a structured data source.</p>
+<h2>8.3 Scalability</h2>
+<p>The architecture can scale with Firestore indexes, pagination, Cloud Functions, notifications, role-based accounts, analytics dashboards, and official ticket integrations.</p>
+<h2>8.4 Deployment Considerations</h2>
+<p>A public deployment should include verified authority roles, moderation, abuse prevention, privacy policy, secure Firebase rules, duplicate detection, and complaint assignment workflow.</p>
+<p>The real-world applicability and scalability aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The real-world applicability and scalability aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The real-world applicability and scalability aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The real-world applicability and scalability aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The real-world applicability and scalability aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The real-world applicability and scalability aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The real-world applicability and scalability aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The real-world applicability and scalability aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<div class="page-break"></div>
+<h1>CHAPTER 9: LIMITATIONS AND FUTURE SCOPE</h1>
+<h2>9.1 Limitations</h2>
+<p>The prototype does not yet include an authority dashboard, official ticket registration, verified closure by civic staff, server-side search, advanced analytics, or duplicate detection.</p>
+<h2>9.2 Future Scope</h2>
+<p>Future enhancements include authority dashboard, push notifications, role-based access, geo-tagged pins, duplicate issue detection, multilingual support, offline drafts, moderation tools, analytics, and official complaint API integration.</p>
+<h2>9.3 Ethical and Privacy Scope</h2>
+<p>Location access should remain permission-based. Sensitive profile data should be minimized. Public comments should be moderated in production environments.</p>
+<h2>9.4 Maintenance Scope</h2>
+<p>Future maintenance should separate reusable services further, add automated tests, optimize Firestore reads, and document deployment configuration.</p>
+<p>The future scope aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The future scope aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The future scope aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The future scope aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The future scope aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The future scope aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The future scope aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The future scope aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<div class="page-break"></div>
+<h1>CHAPTER 10: CONCLUSION</h1>
+<h2>10.1 Summary</h2>
+<p>CivicConnect demonstrates how a mobile-first system can improve civic issue reporting. The project combines Flutter, Firebase, Cloud Firestore, Cloudinary, OpenStreetMap, location services, weather data, and Firebase AI into a functional working prototype.</p>
+<h2>10.2 Outcome</h2>
+<p>The system supports authenticated reporting, multiple image evidence, zone selection, real-time feed updates, image-supported comments, replies, comment deletion by owner, likes, owner-controlled status updates with proof photos, fullscreen media preview, search, splash-on-reload routing, launcher icon setup, map visualization, profile management, and AI-assisted report writing.</p>
+<h2>10.3 Final Conclusion</h2>
+<p>The project meets the expectations of an implementation-based project because it delivers a working application, addresses a real problem, applies modern software tools, and includes a clear path for real-world scalability.</p>
+<h2>10.4 Closing Statement</h2>
+<p>CivicConnect provides a foundation for accountable local issue management and gives users a practical way to convert everyday observations into trackable digital reports.</p>
+<p>The conclusion aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The conclusion aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The conclusion aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The conclusion aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The conclusion aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The conclusion aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The conclusion aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<p>The conclusion aspect of CivicConnect was studied from an implementation perspective. The team focused on building a working prototype instead of limiting the work to theoretical design. Each feature was evaluated for usability, reliability, security, and maintainability. The application uses a modular Flutter codebase, Firebase services, cloud media upload, map visualization, and AI assistance to create a practical reporting workflow for users.</p>
+<div class="page-break"></div>
+<h1>FUNCTIONAL REQUIREMENTS TABLE</h1>
+<table><tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>FR-01</td>
+<td>Signup</td>
+<td>Create account using full name, username, email, and password.</td>
+</tr>
+<tr>
+<td>FR-02</td>
+<td>Login</td>
+<td>Authenticate users using Firebase Authentication.</td>
+</tr>
+<tr>
+<td>FR-03</td>
+<td>Create Post</td>
+<td>Create civic report with text, zone, category, urgency, and optional multiple images.</td>
+</tr>
+<tr>
+<td>FR-04</td>
+<td>Feed</td>
+<td>Display posts in real time using Firestore streams.</td>
+</tr>
+<tr>
+<td>FR-05</td>
+<td>Comments</td>
+<td>Allow post discussion, comment replies, and optional comment images.</td>
+</tr>
+<tr>
+<td>FR-06</td>
+<td>Likes</td>
+<td>Allow likes on posts and comments.</td>
+</tr>
+<tr>
+<td>FR-07</td>
+<td>Status</td>
+<td>Allow only the post owner to update or resolve status.</td>
+</tr>
+<tr>
+<td>FR-08</td>
+<td>Search</td>
+<td>Search by text, username, status, zone, category, urgency, and hashtags.</td>
+</tr>
+<tr>
+<td>FR-09</td>
+<td>Map</td>
+<td>Show zone-wise active and total issue counts.</td>
+</tr>
+<tr>
+<td>FR-10</td>
+<td>AI Assistant</td>
+<td>Use CivicMate to help users draft better reports.</td>
+</tr>
+<tr>
+<td>FR-11</td>
+<td>Resolution Proof Images</td>
+<td>Allow the post owner to attach proof photos while marking a post as resolved.</td>
+</tr>
+<tr>
+<td>FR-12</td>
+<td>Fullscreen Media Preview</td>
+<td>Allow users to tap an image and view it fullscreen on a black background.</td>
+</tr>
+<tr>
+<td>FR-13</td>
+<td>Comment Deletion</td>
+<td>Allow users to delete only their own comments.</td>
+</tr>
+<tr>
+<td>FR-14</td>
+<td>Splash Routing</td>
+<td>Show splash screen whenever the application starts or the browser reloads.</td>
+</tr>
+<tr>
+<td>FR-15</td>
+<td>Launcher Icon</td>
+<td>Use the configured icon asset to generate Android and iOS launcher icons.</td>
+</tr>
+</table>
+<div class="page-break"></div>
+<h1>TEST CASE MATRIX</h1>
+<table><tr>
+<th>Test ID</th>
+<th>Scenario</th>
+<th>Expected Result</th>
+<th>Status</th>
+</tr>
+<tr>
+<td>TC-01</td>
+<td>Signup with valid details</td>
+<td>Account and profile are created.</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>TC-02</td>
+<td>Signup with empty full name</td>
+<td>Validation warning is shown.</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>TC-03</td>
+<td>Login with registered email</td>
+<td>User reaches home screen.</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>TC-04</td>
+<td>Create post without required fields</td>
+<td>Submission is blocked.</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>TC-05</td>
+<td>Create post with image</td>
+<td>Image uploads and post appears.</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>TC-05A</td>
+<td>Create post with multiple images</td>
+<td>All selected images upload and display as a gallery.</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>TC-06</td>
+<td>Like a post</td>
+<td>Like state updates.</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>TC-07</td>
+<td>Comment on post</td>
+<td>Comment appears in real time.</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>TC-08</td>
+<td>Reply to comment</td>
+<td>Reply label and metadata are saved.</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>TC-08A</td>
+<td>Add comment with image</td>
+<td>Comment text and attached images appear in the comment list.</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>TC-08B</td>
+<td>Delete own comment</td>
+<td>Only the comment owner sees delete action and can remove it.</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>TC-09</td>
+<td>Non-owner resolves post</td>
+<td>Action is blocked.</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>TC-10</td>
+<td>Owner resolves post</td>
+<td>Proof text and proof photos are saved and post is locked.</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>TC-11</td>
+<td>Search by zone</td>
+<td>Matching posts are shown.</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>TC-12</td>
+<td>Open CivicMate</td>
+<td>AI reply or fallback appears.</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>TC-13</td>
+<td>Tap post image</td>
+<td>Image opens fullscreen with black surrounding area.</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>TC-14</td>
+<td>Reload app on login route</td>
+<td>Splash screen appears first before routing.</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>TC-15</td>
+<td>Generate launcher icons</td>
+<td>Native launcher icon files are regenerated from assets/icon.png.</td>
+<td>Pass</td>
+</tr>
+</table>
+<div class="page-break"></div>
+<h1>REFERENCES</h1>
+<ul>
+<li>Flutter framework documentation for cross-platform UI development concepts.</li>
+<li>Firebase Authentication and Cloud Firestore documentation for identity and real-time database concepts.</li>
+<li>Cloudinary upload API documentation for cloud-based image hosting concepts.</li>
+<li>OpenStreetMap and flutter_map documentation for interactive map rendering concepts.</li>
+<li>Open-Meteo API documentation for weather data concepts.</li>
+<li>Firebase AI and Gemini service documentation for AI assistant integration concepts.</li>
+<li>CivicConnect source code files: main.dart, home_screen.dart, create_post_screen.dart, profile_screen.dart, firestore_services.dart, cloudinary_service.dart, and gemini_service.dart.</li>
+</ul>
+<div class="page-break"></div>
+<h1>APPENDIX A: MODULE-WISE DESCRIPTION</h1>
+<h2>Login Screen</h2>
+<p>The Login Screen module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Login Screen can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Login Screen should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Signup Screen</h2>
+<p>The Signup Screen module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Signup Screen can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Signup Screen should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Forgot Password Screen</h2>
+<p>The Forgot Password Screen module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Forgot Password Screen can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Forgot Password Screen should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Home Feed</h2>
+<p>The Home Feed module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Home Feed can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Home Feed should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Create Post Screen</h2>
+<p>The Create Post Screen module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Create Post Screen can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Create Post Screen should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Search Screen</h2>
+<p>The Search Screen module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Search Screen can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Search Screen should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Zone Map Screen</h2>
+<p>The Zone Map Screen module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Zone Map Screen can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Zone Map Screen should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Post Card Component</h2>
+<p>The Post Card Component module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Post Card Component can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Post Card Component should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Comments Sheet</h2>
+<p>The Comments Sheet module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Comments Sheet can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Comments Sheet should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Inline Comments</h2>
+<p>The Inline Comments module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Inline Comments can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Inline Comments should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>CivicMate Chat</h2>
+<p>The CivicMate Chat module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, CivicMate Chat can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for CivicMate Chat should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Profile Screen</h2>
+<p>The Profile Screen module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Profile Screen can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Profile Screen should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Cloudinary Service</h2>
+<p>The Cloudinary Service module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Cloudinary Service can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Cloudinary Service should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Firestore Service</h2>
+<p>The Firestore Service module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Firestore Service can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Firestore Service should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Gemini Service</h2>
+<p>The Gemini Service module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Gemini Service can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Gemini Service should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Theme Controller</h2>
+<p>The Theme Controller module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Theme Controller can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Theme Controller should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Top Snackbar</h2>
+<p>The Top Snackbar module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Top Snackbar can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Top Snackbar should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Reusable Loaders</h2>
+<p>The Reusable Loaders module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Reusable Loaders can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Reusable Loaders should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Scroll To Top Button</h2>
+<p>The Scroll To Top Button module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Scroll To Top Button can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Scroll To Top Button should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h2>Glowing Background Logo</h2>
+<p>The Glowing Background Logo module contributes to the overall CivicConnect workflow by handling a focused part of the application. Its design follows the project goal of keeping the user journey simple while maintaining structured data and clear feedback.</p>
+<p>From a maintenance point of view, Glowing Background Logo can be improved independently as the application grows. Future development may add stronger tests, accessibility labels, role-based variations, and performance optimizations depending on deployment needs.</p>
+<p>Implementation notes for Glowing Background Logo should be read with the source code and final APK demonstration. During viva or project evaluation, the team can explain the purpose of the module, the data it reads or writes, the validation it performs, and how it contributes to the final user journey.</p>
+<div class="page-break"></div>
+<h1>APPENDIX B: EXTENDED TEST NOTES</h1>
+<p>Extended Test 1: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 2: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 3: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 4: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 5: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 6: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 7: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 8: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 9: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 10: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 11: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 12: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 13: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 14: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 15: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 16: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 17: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 18: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 19: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 20: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 21: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 22: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 23: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 24: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 25: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 26: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 27: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 28: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 29: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 30: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 31: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 32: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 33: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 34: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<p>Extended Test 35: Verify a combined workflow involving authentication, navigation, reporting, interaction, data refresh, and permission control. The expected result is that CivicConnect provides visible feedback, preserves data correctly, and prevents unauthorized mutation of another user's report.</p>
+<div class="page-break"></div>
+<h1>APPENDIX C: SCREENSHOT PLACEHOLDERS</h1>
+<h2>Splash Screen</h2>
+<div class='placeholder'>[Insert screenshot of Splash Screen here]</div>
+<p>This screenshot should show the working Splash Screen of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>Login Screen</h2>
+<div class='placeholder'>[Insert screenshot of Login Screen here]</div>
+<p>This screenshot should show the working Login Screen of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>Signup Screen</h2>
+<div class='placeholder'>[Insert screenshot of Signup Screen here]</div>
+<p>This screenshot should show the working Signup Screen of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>Home Feed</h2>
+<div class='placeholder'>[Insert screenshot of Home Feed here]</div>
+<p>This screenshot should show the working Home Feed of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>Create Post Form</h2>
+<div class='placeholder'>[Insert screenshot of Create Post Form here]</div>
+<p>This screenshot should show the working Create Post Form of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>Multiple Image Upload Preview</h2>
+<div class='placeholder'>[Insert screenshot of Multiple Image Upload Preview here]</div>
+<p>This screenshot should show the working Multiple Image Upload Preview of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>Post Image Gallery</h2>
+<div class='placeholder'>[Insert screenshot of Post Image Gallery here]</div>
+<p>This screenshot should show the working Post Image Gallery of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>Fullscreen Image Preview</h2>
+<div class='placeholder'>[Insert screenshot of Fullscreen Image Preview here]</div>
+<p>This screenshot should show the working Fullscreen Image Preview of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>Search Screen</h2>
+<div class='placeholder'>[Insert screenshot of Search Screen here]</div>
+<p>This screenshot should show the working Search Screen of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>Zone Map</h2>
+<div class='placeholder'>[Insert screenshot of Zone Map here]</div>
+<p>This screenshot should show the working Zone Map of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>Comment Reply Flow</h2>
+<div class='placeholder'>[Insert screenshot of Comment Reply Flow here]</div>
+<p>This screenshot should show the working Comment Reply Flow of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>Comment Image Attachment</h2>
+<div class='placeholder'>[Insert screenshot of Comment Image Attachment here]</div>
+<p>This screenshot should show the working Comment Image Attachment of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>Delete Own Comment</h2>
+<div class='placeholder'>[Insert screenshot of Delete Own Comment here]</div>
+<p>This screenshot should show the working Delete Own Comment of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>Resolution Proof Dialog</h2>
+<div class='placeholder'>[Insert screenshot of Resolution Proof Dialog here]</div>
+<p>This screenshot should show the working Resolution Proof Dialog of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>Resolution Proof Image Preview</h2>
+<div class='placeholder'>[Insert screenshot of Resolution Proof Image Preview here]</div>
+<p>This screenshot should show the working Resolution Proof Image Preview of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>CivicMate Chat</h2>
+<div class='placeholder'>[Insert screenshot of CivicMate Chat here]</div>
+<p>This screenshot should show the working CivicMate Chat of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>Profile Dashboard</h2>
+<div class='placeholder'>[Insert screenshot of Profile Dashboard here]</div>
+<p>This screenshot should show the working Profile Dashboard of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>Project Information Sheet</h2>
+<div class='placeholder'>[Insert screenshot of Project Information Sheet here]</div>
+<p>This screenshot should show the working Project Information Sheet of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>NorthCap Logo and Signature Section</h2>
+<div class='placeholder'>[Insert screenshot of NorthCap Logo and Signature Section here]</div>
+<p>This screenshot should show the working NorthCap Logo and Signature Section of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h2>Generated Launcher Icon on Device</h2>
+<div class='placeholder'>[Insert screenshot of Generated Launcher Icon on Device here]</div>
+<p>This screenshot should show the working Generated Launcher Icon on Device of CivicConnect. Capture it from the Android emulator or physical APK after final build.</p>
+<div class="page-break"></div>
+<h1>APPENDIX D: FEATURE VERIFICATION SHEETS</h1>
+<h2>Multiple Post Images</h2>
+<p>Verify that users can select more than one gallery image, see thumbnails before upload, remove an unwanted thumbnail, submit the post, and later view all uploaded images in the feed gallery.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Multiple Post Images here]</div>
+<div class="page-break"></div>
+<h2>Camera Image Attachment</h2>
+<p>Verify that a camera-captured image can still be attached to a post and that the old single-image flow remains compatible with the new multi-image storage model.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Camera Image Attachment here]</div>
+<div class="page-break"></div>
+<h2>Backward-Compatible Image Fields</h2>
+<p>Verify that old posts using imageUrl still display correctly and new posts using imageUrls display correctly. This protects older Firestore records from breaking after the media upgrade.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Backward-Compatible Image Fields here]</div>
+<div class="page-break"></div>
+<h2>Fullscreen Image Preview</h2>
+<p>Verify that tapping any post or comment image opens the media on a black fullscreen background with zoom and pan support.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Fullscreen Image Preview here]</div>
+<div class="page-break"></div>
+<h2>Comment Image Upload</h2>
+<p>Verify that users can attach one or more images to a comment, preview them before sending, and remove selected images before upload.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Comment Image Upload here]</div>
+<div class="page-break"></div>
+<h2>Image-Only Comment Support</h2>
+<p>Verify that a comment can be submitted when it has image evidence even if the text field is empty.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Image-Only Comment Support here]</div>
+<div class="page-break"></div>
+<h2>Comment Reply Metadata</h2>
+<p>Verify that replies store the target comment id and target username so the UI can show who is being replied to.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Comment Reply Metadata here]</div>
+<div class="page-break"></div>
+<h2>Owner-Only Comment Delete</h2>
+<p>Verify that delete controls appear only for comments created by the current user and that the backend blocks deletion by other users.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Owner-Only Comment Delete here]</div>
+<div class="page-break"></div>
+<h2>Resolution Proof Text</h2>
+<p>Verify that marking a post as resolved requires meaningful proof text unless proof photos are attached.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Resolution Proof Text here]</div>
+<div class="page-break"></div>
+<h2>Resolution Proof Photos</h2>
+<p>Verify that proof photos upload to Cloudinary and are saved both on the post document and in the automatic resolution proof comment.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Resolution Proof Photos here]</div>
+<div class="page-break"></div>
+<h2>Resolved Post Locking</h2>
+<p>Verify that resolved posts cannot be changed again after proof is submitted.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Resolved Post Locking here]</div>
+<div class="page-break"></div>
+<h2>Search Focus Stability</h2>
+<p>Verify that typing in the search box no longer dismisses the keyboard after every letter because the Firestore stream is cached.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Search Focus Stability here]</div>
+<div class="page-break"></div>
+<h2>Splash on Reload</h2>
+<p>Verify that refreshing the app on login or home route still shows the splash screen before routing to the correct page.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Splash on Reload here]</div>
+<div class="page-break"></div>
+<h2>Launcher Icon Generation</h2>
+<p>Verify that flutter_launcher_icons uses assets/icon.png and updates Android mipmap launcher files.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Launcher Icon Generation here]</div>
+<div class="page-break"></div>
+<h2>NorthCap Branding Assets</h2>
+<p>Verify that assets/images/northcap_university_logo.jpg and assets/images/nishu_signature.jpg render in the profile project information section.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for NorthCap Branding Assets here]</div>
+<div class="page-break"></div>
+<h2>Location Permission and Weather</h2>
+<p>Verify that Android location permission is requested and temperature loads when permission and location services are available.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Location Permission and Weather here]</div>
+<div class="page-break"></div>
+<h2>Owner-Only Resolve</h2>
+<p>Verify that only the original poster can resolve an issue and that other users can only view the status badge.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Owner-Only Resolve here]</div>
+<div class="page-break"></div>
+<h2>Share Format</h2>
+<p>Verify that shared post text includes title, metadata, link-style identifier, and all photo links.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Share Format here]</div>
+<div class="page-break"></div>
+<h2>Map Zone Counts</h2>
+<p>Verify that zone active and total counts update from Firestore data.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for Map Zone Counts here]</div>
+<div class="page-break"></div>
+<h2>CivicMate Chat Layout</h2>
+<p>Verify that quick recommendations hide after chat begins so they do not interfere with typing.</p>
+<p>Expected outcome: The feature should work in both debug and release-oriented testing paths without causing analyzer errors, runtime crashes, or unauthorized data mutation.</p>
+<p>Evidence to attach: Add one screenshot before action, one screenshot after action, and a short note describing the Firestore field or UI state that changed.</p>
+<div class='placeholder'>[Insert verification screenshot for CivicMate Chat Layout here]</div>
+<div class="page-break"></div>
+</body></html>
+

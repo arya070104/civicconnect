@@ -29,7 +29,8 @@ class TopSnackBar {
     if (vibrate) HapticFeedback.mediumImpact();
 
     final overlay = Overlay.of(context);
-    final overlayEntry = OverlayEntry(
+    late final OverlayEntry overlayEntry;
+    overlayEntry = OverlayEntry(
       builder:
           (context) => _TopSnackBarWidget(
             message: message,
@@ -37,18 +38,20 @@ class TopSnackBar {
             accentColor: accentColor,
             textColor: isDark ? Colors.white : const Color(0xFF4B1E18),
             icon: icon,
+            duration: duration,
+            onDismissed: () {
+              if (_currentEntry == overlayEntry) {
+                _currentEntry?.remove();
+                _currentEntry = null;
+                _isCurrentEntryMounted = false;
+              }
+            },
           ),
     );
 
     _currentEntry = overlayEntry;
     _isCurrentEntryMounted = true;
     overlay.insert(overlayEntry);
-
-    Future.delayed(duration, () {
-      if (_currentEntry == overlayEntry) {
-        _removeCurrentEntry();
-      }
-    });
   }
 
   static void _removeCurrentEntry() {
@@ -66,12 +69,16 @@ class _TopSnackBarWidget extends StatefulWidget {
   final Color accentColor;
   final Color textColor;
   final IconData? icon;
+  final Duration duration;
+  final VoidCallback onDismissed;
 
   const _TopSnackBarWidget({
     required this.message,
     required this.color,
     required this.accentColor,
     required this.textColor,
+    required this.duration,
+    required this.onDismissed,
     this.icon,
   });
 
@@ -84,6 +91,7 @@ class _TopSnackBarWidgetState extends State<_TopSnackBarWidget>
   late AnimationController controller;
   late Animation<Offset> slideAnimation;
   late Animation<double> fadeAnimation;
+  late Animation<double> scaleAnimation;
 
   @override
   void initState() {
@@ -91,17 +99,26 @@ class _TopSnackBarWidgetState extends State<_TopSnackBarWidget>
 
     controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 380),
+      duration: const Duration(milliseconds: 420),
+      reverseDuration: const Duration(milliseconds: 220),
     );
 
     slideAnimation = Tween<Offset>(
-      begin: const Offset(0, -1.4),
-      end: const Offset(0, 0.1),
-    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOutBack));
+      begin: const Offset(0, -1.2),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOutCubic));
 
-    fadeAnimation = CurvedAnimation(parent: controller, curve: Curves.easeIn);
+    fadeAnimation = CurvedAnimation(parent: controller, curve: Curves.easeOut);
+    scaleAnimation = Tween<double>(begin: 0.96, end: 1).animate(
+      CurvedAnimation(parent: controller, curve: Curves.easeOutBack),
+    );
 
     controller.forward();
+    Future.delayed(widget.duration, () async {
+      if (!mounted) return;
+      await controller.reverse();
+      if (mounted) widget.onDismissed();
+    });
   }
 
   @override
@@ -122,61 +139,68 @@ class _TopSnackBarWidgetState extends State<_TopSnackBarWidget>
         position: slideAnimation,
         child: FadeTransition(
           opacity: fadeAnimation,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(30),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 13,
-                ),
-                decoration: BoxDecoration(
-                  color: widget.color,
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(
-                    color: widget.accentColor.withValues(alpha: 0.22),
-                    width: 1.2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: widget.accentColor.withValues(alpha: 0.18),
-                      blurRadius: 24,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 10),
+          child: ScaleTransition(
+            scale: scaleAnimation,
+            child: Material(
+              color: Colors.transparent,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 13,
                     ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 34,
-                      height: 34,
-                      decoration: BoxDecoration(
-                        color: widget.accentColor.withValues(alpha: 0.14),
-                        shape: BoxShape.circle,
+                    decoration: BoxDecoration(
+                      color: widget.color,
+                      borderRadius: BorderRadius.circular(22),
+                      border: Border.all(
+                        color: widget.accentColor.withValues(alpha: 0.22),
+                        width: 1.2,
                       ),
-                      child: Icon(
-                        widget.icon ?? Icons.notifications_active_outlined,
-                        color: widget.accentColor,
-                        size: 19,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Flexible(
-                      child: Text(
-                        widget.message,
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          color: widget.textColor,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                      boxShadow: [
+                        BoxShadow(
+                          color: widget.accentColor.withValues(alpha: 0.18),
+                          blurRadius: 24,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 10),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            color: widget.accentColor.withValues(alpha: 0.14),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            widget.icon ?? Icons.notifications_active_outlined,
+                            color: widget.accentColor,
+                            size: 19,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Flexible(
+                          child: Text(
+                            widget.message,
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              color: widget.textColor,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),

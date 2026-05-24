@@ -39,6 +39,7 @@ class CloudinaryService {
     required String postId,
     File? imageFile,
     Uint8List? imageBytes,
+    String? publicIdSuffix,
   }) async {
     if (!isConfigured) {
       throw const CloudinaryUploadException(
@@ -53,7 +54,8 @@ class CloudinaryService {
     final uri = Uri.parse(
       "https://api.cloudinary.com/v1_1/$cloudName/image/upload",
     );
-    final publicId = "${userId}_$postId";
+    final publicId =
+        "${userId}_$postId${publicIdSuffix == null ? "" : "_$publicIdSuffix"}";
     final request =
         http.MultipartRequest("POST", uri)
           ..fields["upload_preset"] = uploadPreset
